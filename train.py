@@ -6,7 +6,7 @@ import json
 
 import model as models
 from data_loader.preprocess import Preprocess
-from data_loader.dataset import BaseDataset, get_loader
+from dataset.dataset import BaseDataset, get_loader
 from sklearn.model_selection import KFold
 from trainer import BaseTrainer
 from utils import read_json, set_seed
@@ -27,18 +27,21 @@ def main(config):
     print(config["num_cols"])
     print("---------------------------DONE PREPROCESSING----------------------------")
     now = datetime.now(timezone("Asia/Seoul")).strftime(f"%Y-%m-%d_%H:%M")
-    
+
     print("-----------------------------START TRAINING------------------------------")
     if "sweep" in config:
         wandb_train_func = functools.partial(
             run_kfold_sweep, config["preprocess"]["num_fold"], config, data, now
         )
         sweep_config = json.loads(json.dumps(config["sweep"]))
-        sweep_id = wandb.sweep(sweep_config, entity=config["entity"], project=config["project"])
+        sweep_id = wandb.sweep(
+            sweep_config, entity=config["entity"], project=config["project"]
+        )
         wandb.agent(sweep_id, function=wandb_train_func)
     else:
         run_kfold(config["preprocess"]["num_fold"], config, data, now)
     print("---------------------------DONE TRAINING---------------------------")
+
 
 def run_kfold_sweep(k, config, data, now):
     kf = KFold(n_splits=k, shuffle=True, random_state=config["trainer"]["seed"])
@@ -75,19 +78,21 @@ def run_kfold_sweep(k, config, data, now):
         )
 
         result = trainer.train()
-        wandb.log(result, step=fold+1)
-        val_fold += result['val_aucroc']
+        wandb.log(result, step=fold + 1)
+        val_fold += result["val_aucroc"]
         print(
             f"---------------------------DONE FOLD {fold + 1} TRAINING--------------------------"
         )
-    wandb.log({"val_fold": val_fold/k})
+    wandb.log({"val_fold": val_fold / k})
+
 
 def run_sweep():
     pass
 
+
 def run_kfold(k, config, data, now):
     kf = KFold(n_splits=k, shuffle=True, random_state=config["trainer"]["seed"])
-    
+
     for fold, (train_idx, val_idx) in enumerate(
         kf.split(data["userID"].unique().tolist())
     ):
@@ -99,8 +104,12 @@ def run_kfold(k, config, data, now):
         )
 
         model = models.get_models(config)
-        
-        wandb.init(project=config["project"], entity=config["entity"], name=f'{now}_{config["user"]}_fold_{fold+1}')
+
+        wandb.init(
+            project=config["project"],
+            entity=config["entity"],
+            name=f'{now}_{config["user"]}_fold_{fold+1}',
+        )
         wandb.watch(model)
 
         print(
