@@ -1,5 +1,5 @@
 from data_loader.preprocess import Preprocess
-from data_loader.dataset import BaseDataset, collate_fn
+from dataset.dataset import BaseDataset, collate_fn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -67,8 +67,7 @@ def main(config):
     os.makedirs(sub_path, exist_ok=True)
     cur_time = str(datetime.now(timezone("Asia/Seoul")))[:19]
     sub_path = os.path.join(
-        sub_path,
-        f"inference_{cur_time}_{config['preprocess']['data_ver']}.csv",
+        sub_path, f"inference_{cur_time}_{config['preprocess']['data_ver']}.csv",
     )
     sub.to_csv(sub_path, index=None)
     print("---------------------------DONE PREDICTION-------------------------------")
