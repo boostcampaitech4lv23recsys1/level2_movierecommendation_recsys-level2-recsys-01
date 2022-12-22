@@ -4,12 +4,13 @@ from torch.utils.data import DataLoader
 import numpy as np
 from utils import neg_sample
 
-class SeqDataset(Dataset): # DKT에서 가져오면서 변형
+
+class SeqDataset(Dataset):  # DKT에서 가져오면서 변형
     def __init__(
-            self,
-            data: Dataset,
-            idx: list,
-            config: dict,
+        self,
+        data: Dataset,
+        idx: list,
+        config: dict,
     ) -> None:
         super().__init__()
         self.data = data[data["user"].isin(idx)]
@@ -17,7 +18,7 @@ class SeqDataset(Dataset): # DKT에서 가져오면서 변형
         self.config = config
         self.max_seq_len = config["dataset"]["max_seq_len"]
 
-        # 타겟은 봤으면 1, 안 봤으면 0, seen는 그럼 1이어야 할 것
+        # seen이라는 target column 필요
         self.Y = self.data.groupby("user")["seen"]
 
         self.cur_cat_col = [f"{col}2idx" for col in config["cat_cols"]] + ["user"]
@@ -29,13 +30,13 @@ class SeqDataset(Dataset): # DKT에서 가져오면서 변형
         self.X_num = self.X_num.groupby("user")
 
         self.group_data = self.data.groupby("user")
-    
+
     def __len__(self) -> int:
         """
         return data length
         """
         return len(self.user_list)
-    
+
     def __getitem__(self, index: int) -> object:
         user = self.user_list[index]
         cat = self.X_cat.get_group(user).values[:, :-1]
@@ -80,37 +81,46 @@ class SeqDataset(Dataset): # DKT에서 가져오면서 변형
 
         return {"cat": cat, "num": num, "answerCode": y, "mask": mask}
 
+
 class NonSeqDataset(Dataset):
     def __init__(
-            self,
-            data: Dataset,
-            idx: list,
-            config: dict,
+        self,
+        data: Dataset,
+        idx: list,
+        config: dict,
     ) -> None:
         super().__init__()
 
         raise NotImplementedError
-    
+
     def __len__(self) -> int:
 
         raise NotImplementedError
-    
+
     def __getitem__(self, index: int) -> object:
 
         raise NotImplementedError
 
+
 class SASRecDataset(Dataset):
-    def __init__(self, args, user_seq, test_neg_items=None, data_type="train"):
-        self.args = args
-        self.user_seq = user_seq
+    def __init__(
+        self, 
+        config, 
+        user_seq, 
+        test_neg_items=None, 
+        data_type="train"
+    ) -> None:
+        super().__init__()
+        self.config = config
+        self.user_seq = user_seq # user가 본 item 나열
         self.test_neg_items = test_neg_items
         self.data_type = data_type
-        self.max_len = args.max_seq_length
-    
-    def __len__(self):
+        self.max_len = config["dataset"]["max_seq_len"]
+
+    def __len__(self) -> int:
         return len(self.user_seq)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int) -> tuple:
 
         user_id = index
         items = self.user_seq[index]
@@ -152,7 +162,7 @@ class SASRecDataset(Dataset):
         target_neg = []
         seq_set = set(items)
         for _ in input_ids:
-            target_neg.append(neg_sample(seq_set, self.args.item_size))
+            target_neg.append(neg_sample(seq_set, self.config["item_size"])) # config에 item_size 필요
 
         pad_len = self.max_len - len(input_ids)
         input_ids = [0] * pad_len + input_ids
@@ -189,7 +199,6 @@ class SASRecDataset(Dataset):
 
         return cur_tensors
 
-
 def collate_fn(batch):
     """
     [batch, data_len, dict] -> [dict, batch, data_len]
@@ -208,11 +217,8 @@ def collate_fn(batch):
         "mask": torch.stack(mask),
     }
 
-def get_loader(
-        train_set: Dataset,
-        val_set: Dataset,
-        config: dict
-) -> DataLoader:
+
+def get_loader(train_set: Dataset, val_set: Dataset, config: dict) -> DataLoader:
     """
     get Data Loader
     """
