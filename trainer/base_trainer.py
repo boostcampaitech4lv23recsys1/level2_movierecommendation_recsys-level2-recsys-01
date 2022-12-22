@@ -32,7 +32,7 @@ class BaseTrainer:
 
         self.device = config["device"]
 
-        self.criterion = get_loss(config)
+        self.criterion = get_loss(config["loss"])
         self.metric_ftns = self.cfg_trainer["metric"]
         self.optimizer = get_optimizer(self.model, config["optimizer"])
         self.lr_scheduler = get_scheduler(self.optimizer, config)
