@@ -41,7 +41,7 @@ class SequenceTrainer(BaseTrainer):
         train_result["train_loss"] = loss
         train_result["train_recall"] = 0.1
 
-        return train_result
+        raise NotImplementedError
 
     def _valid_epoch(self, epoch: int) -> Dict[str, float]:
         valid_result = dict()
@@ -57,4 +57,4 @@ class SequenceTrainer(BaseTrainer):
         valid_result["valid_loss"] = loss
         valid_result["valid_recall"] = 0.1
 
-        return valid_result
+        raise NotImplementedError
