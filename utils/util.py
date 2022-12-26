@@ -47,6 +47,11 @@ class MetricTracker:
     def result(self):
         return dict(self._data.average)
 
+def neg_sample(item_set, item_size):
+    item = random.randint(1, item_size - 1)
+    while item in item_set:
+        item = random.randint(1, item_size - 1)
+    return item
 
 FEATURES = [
     "userID",

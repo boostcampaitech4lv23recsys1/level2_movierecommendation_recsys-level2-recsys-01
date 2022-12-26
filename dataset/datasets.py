@@ -2,35 +2,34 @@ import torch
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import numpy as np
-from sklearn import preprocessing
-import random
+from utils import neg_sample
 
-import pandas as pd
 
-class BaseDataset(Dataset):
+class SeqDataset(Dataset):  # DKT에서 가져오면서 변형
     def __init__(
-            self,
-            data: Dataset,
-            idx: list,
-            config: dict,
+        self,
+        data: Dataset,
+        idx: list,
+        config: dict,
     ) -> None:
         super().__init__()
-        self.data = data[data["userID"].isin(idx)]
-        self.user_list = self.data["userID"].unique().tolist()
+        self.data = data[data["user"].isin(idx)] # train/valid에 해당하는 user만 모음
+        self.user_list = self.data["user"].unique().tolist()
         self.config = config
         self.max_seq_len = config["dataset"]["max_seq_len"]
 
-        self.Y = self.data.groupby("userID")["answerCode"]
+        # seen이라는 target column 필요. 기존 데이터는 1, negative sampling 데이터는 0
+        self.Y = self.data.groupby("user")["seen"]
 
-        self.cur_cat_col = [f"{col}2idx" for col in config["cat_cols"]] + ["userID"]
-        self.cur_num_col = config["num_cols"] + ["userID"]
+        self.cur_cat_col = [f"{col}2idx" for col in config["cat_cols"]] + ["user"] # user를 포함
+        self.cur_num_col = config["num_cols"] + ["user"] # user를 포함
         self.X_cat = self.data.loc[:, self.cur_cat_col].copy()
         self.X_num = self.data.loc[:, self.cur_num_col].copy()
 
-        self.X_cat = self.X_cat.groupby("userID")
-        self.X_num = self.X_num.groupby("userID")
+        self.X_cat = self.X_cat.groupby("user")
+        self.X_num = self.X_num.groupby("user")
 
-        self.group_data = self.data.groupby("userID")
+        self.group_data = self.data.groupby("user")
 
     def __len__(self) -> int:
         """
@@ -40,9 +39,9 @@ class BaseDataset(Dataset):
 
     def __getitem__(self, index: int) -> object:
         user = self.user_list[index]
-        cat = self.X_cat.get_group(user).values[:, :-1]
-        num = self.X_num.get_group(user).values[:, :-1].astype(np.float32)
-        y = self.Y.get_group(user).values
+        cat = self.X_cat.get_group(user).values[:, :-1] # cat feature
+        num = self.X_num.get_group(user).values[:, :-1].astype(np.float32) # num feature
+        y = self.Y.get_group(user).values # target
         seq_len = cat.shape[0]
 
         if seq_len >= self.max_seq_len:
@@ -80,8 +79,42 @@ class BaseDataset(Dataset):
             mask = torch.zeros(self.max_seq_len, dtype=torch.long)
             mask[-seq_len:] = 1
 
-        return {"cat": cat, "num": num, "answerCode": y, "mask": mask}
+        return {"cat": cat, "num": num, "seen": y, "mask": mask}
 
+
+class NonSeqDataset(Dataset):
+    def __init__(
+        self,
+        data: Dataset,
+        idx: list,
+        config: dict,
+    ) -> None:
+        super().__init__()
+        self.data = data[data["user"].isin(idx)] # train/valid에 해당하는 user만 모음
+        # self.user_list = self.data["user"].unique().tolist()
+        self.config = config
+
+        # seen이라는 target column 필요. 기존 데이터는 1, negative sampling 데이터는 0
+        self.Y = self.data["seen"]
+
+        self.cur_cat_col = [f"{col}2idx" for col in config["cat_cols"]]
+        self.cur_num_col = config["num_cols"]
+        self.X_cat = self.data.loc[:, self.cur_cat_col].copy()
+        self.X_num = self.data.loc[:, self.cur_num_col].copy()
+
+    def __len__(self) -> int:
+        """
+        return data length
+        """
+        return len(self.data)
+
+    def __getitem__(self, index: int) -> object:
+        user = self.data["user"][index]
+        cat = self.X_cat[:, :-1]
+        num = self.X_num[:, :-1]
+        y = self.Y
+
+        return {"user": user, "cat": cat, "num": num, "seen": y}
 
 def collate_fn(batch):
     """
@@ -102,11 +135,7 @@ def collate_fn(batch):
     }
 
 
-def get_loader(
-        train_set: Dataset,
-        val_set: Dataset,
-        config: dict
-) -> DataLoader:
+def get_loader(train_set: Dataset, val_set: Dataset, config: dict) -> DataLoader:
     """
     get Data Loader
     """
@@ -126,50 +155,3 @@ def get_loader(
     )
 
     return train_loader, valid_loader
-
-
-class XGBoostDataset(object):
-    def __init__(
-        self,
-        config: dict,
-    ) -> None:
-        self.config = config
-        self.train = self._load_train_data()
-        self.test = self._load_test_data()
-        self.user_ids = list(self.train["userID"].unique())
-        self.test_ids = list(self.test["userID"].unique())
-        self.__preprocessing()
-
-    def __preprocessing(self):
-        cat_cols = self.config.cat_cols
-
-        label_encoder = preprocessing.LabelEncoder()
-        for cat_col in cat_cols:
-            self.train[cat_col] = label_encoder.fit_transform(self.train[cat_col])
-
-        self.train = self.train.reset_index(drop=True)
-
-    def _split(
-        self,
-        ratio=0.9,
-    ):
-        train_df = self.train[~self.train["answerCode"] == -1]
-
-        random.shuffle(self.user_ids)
-
-        train_len = int(len(self.user_ids) * ratio)
-        train_ids = self.user_ids[:train_len]
-        test_ids = self.user_ids[train_len:]
-
-        train = train_df[train_df["userID"].isin(train_ids)]
-        valid = train_df[train_df["userID"].isin(test_ids)]
-
-        valid = valid[valid["userID"] != valid["userID"].shift(-1)]
-
-        return train, valid
-
-    def _load_train_data(self):
-        return pd.read_csv(self.config.data_path)
-
-    def _load_test_data(self):
-        return pd.read_csv(self.config.test_path)
