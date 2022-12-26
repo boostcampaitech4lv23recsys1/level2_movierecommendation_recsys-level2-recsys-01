@@ -94,7 +94,7 @@ def masked_attribute_prediction(
 
     :param sequence_output: (batch, sequence_len, hidden_dim)
     :param target_item: (batch, sequence_len, hidden_dim)
-    :return: return: loss Shape(1)
+    :return: loss Shape(1)
     """
 
     """
@@ -111,8 +111,36 @@ def masked_attribute_prediction(
     return loss_function(score, one_tensor)
 
 
+# SP sample neg segment
+def segment_prediction(
+    context: torch.Tensor,
+    positive_segment: torch.Tensor,
+    negative_segment: torch.Tensor,
+) -> torch.Tensor:
+    """
+    맥락상 마지막엔 뭐가올까요? 를 예측
+    마지막에 뭐가 오는지 보는거라서 Sequence 차원이 빠져있다.
+
+    :param context: (batch, hidden_dim)
+    :param segment: (batch, hidden_dim)
+    :return: loss Shape(1)
+    """
+
+    """
+    context = self.sp_norm(context)    
+    """
+    # (B, H) * (B, H) -> (B, 1) -> (B)
+    positive_score = torch.multiply(context, positive_segment).sum(-1).squeeze(-1)
+    negative_score = torch.multiply(context, negative_segment).sum(-1).squeeze(-1)
+
+    score = positive_score - negative_score
+    one_tensor = torch.ones_like(score)
+    loss_function = nn.BCEWithLogitsLoss()
+    return loss_function(score, one_tensor)
+
+
 def get_loss(loss: str):
-    possible_loss = {"bce", "bce_with_logits", "aap"}
+    possible_loss = {"bce", "bce_with_logits", "aap", "mip", "map", "sp"}
     if loss not in possible_loss:
         raise ValueError(f"{loss}은 지원되지 않는 loss 입니다.\n지원하는 loss 목록: {possible_loss}")
 
@@ -122,3 +150,9 @@ def get_loss(loss: str):
         return BCE_with_logits_loss
     if loss == "aap":
         return associated_attribute_prediction
+    if loss == "mip":
+        return masked_item_prediction
+    if loss == "map":
+        return masked_attribute_prediction
+    if loss == "sp":
+        return segment_prediction
