@@ -85,6 +85,32 @@ def masked_item_prediction(
     return loss_function(score, one_tensor)
 
 
+# MAP
+def masked_attribute_prediction(
+    sequence_output: torch.Tensor, attribute_embedding: torch.Tensor
+) -> torch.Tensor:
+    """
+    어떤 Sequence에서 가운데 장르를 예측해보는 loss
+
+    :param sequence_output: (batch, sequence_len, hidden_dim)
+    :param target_item: (batch, sequence_len, hidden_dim)
+    :return: return: loss Shape(1)
+    """
+
+    """
+    norm.
+    sequence_output = self.map_norm(sequence_output)  # [B L H]
+    """
+    # (B, L, H) * (B, L, H) -> (B, L, 1)
+    score = torch.multiply(attribute_embedding, sequence_output).sum(-1)
+
+    # (B, L, 1) -> (B, L)
+    score = score.squeeze(-1)
+    one_tensor = torch.ones_like(score)
+    loss_function = nn.BCEWithLogitsLoss()
+    return loss_function(score, one_tensor)
+
+
 def get_loss(loss: str):
     possible_loss = {"bce", "bce_with_logits", "aap"}
     if loss not in possible_loss:
