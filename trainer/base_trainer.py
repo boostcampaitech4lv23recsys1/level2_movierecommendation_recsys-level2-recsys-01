@@ -27,7 +27,7 @@ class BaseTrainer:
         self.valid_data_loader = valid_data_loader
         self.config = config
         self.cfg_trainer = config["trainer"]
-        if not fold:
+        if fold:
             self.fold = fold
 
         self.device = config["device"]
@@ -129,7 +129,7 @@ class BaseTrainer:
 
         save_path = os.path.join(self.save_dir, self.model_name)
         os.makedirs(save_path, exist_ok=True)
-        if not self.fold:
+        if self.fold:
             save_path = os.path.join(save_path, f"fold_{self.fold}_best_model.pt")
         else:
             save_path = os.path.join(save_path, "best_model.pt")
