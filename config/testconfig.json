@@ -1,0 +1,62 @@
+{
+    "user": "wonjun",
+    "project": "Test",
+    "entity": "movie-dinosaur",
+  
+    "cat_cols": [
+        
+      ],
+    "num_cols": [
+        
+      ],
+
+    "preprocess": {
+      "data_dir": "  ",
+      "data_ver": "  ",
+      "use_k_fold": true,
+      "num_fold": 5
+    },
+  
+    "dataset": {
+      "type": "SeqDataset",
+      "max_seq_len": 128,
+      "mask_p": 0.2
+    },
+  
+    "data_loader": {
+      "type": "사용할 DataLoader",
+      "args": {
+        "batch_size": 64,
+        "num_workers": 4,
+        "collate_fn": "collate_fn"
+      }
+    },
+  
+    "arch": {
+      "type": "model",
+      "args": {
+        "hidden_dim" : 128,
+        "dropout_rate": 0.1
+      }
+    },
+  
+    "loss": "  ",
+  
+    "optimizer": {
+      "type": "adam",
+      "args": {
+        "lr": 0.001,
+        "weight_decay": 0,
+        "amsgrad": false
+      }
+    },
+  
+    "trainer": {
+      "type": "사용할 Trainer",
+      "epochs": 10,
+      "metric": ["  "],
+      "seed": 417,
+      "save_dir": "  ",
+      "submission_dir": "  "
+    }
+}
