@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import numpy as np
 
 
@@ -68,3 +69,45 @@ def compute_embedding_similarity(
     # (..., 1) -> (...)
     score = score.squeeze(-1)
     return score
+
+
+def get_average_embedding(
+    embedding_table: nn.Embedding, attributes: torch.Tensor
+) -> torch.Tensor:
+    """
+    여러개의 attributes (작가, 장르 등) 를 가지는 경우 각각 임베딩의 평균 구하기
+    장르가 원핫 인코딩으로 들어와서 라벨링 된 장르들의 임베딩의 평균 리턴
+
+    embedding_table: 각 attributes에 해당하는 nn.Embedding
+    attributes: (batch, sequence, num_attributes) 
+    ex) (5, 6, 18) 이면 5명의 유저, 유저당 6개의 영화, 영화당 18개의 장르
+
+    return: (batch, sequence, hidden_dim)
+    ex) (5, 6, 18) -> (5, 6, 30) (장르 하나당 30차원의 embedding)
+    """
+    batch_size, num_movies, num_attributes = attributes.shape
+
+    if num_attributes != embedding_table.weight.size(0):
+        raise IndexError(
+            f"nn.Embedding의 사이즈{embedding_table.weight.size(0)}랑 들어온 one-hot의 크기{num_attributes}가 달라요"
+        )
+
+    indices = []
+    for i in range(batch_size):
+        movie_indices = []
+        for j in range(num_movies):
+            movie_indices.append(
+                [k for k in range(num_attributes) if attributes[i, j, k] == 1]
+            )
+        indices.append(movie_indices)
+
+    dense_embeddings = []
+    for i in range(batch_size):
+        movie_embeddings = []
+        for j in range(num_movies):
+            embeddings = embedding_table(torch.tensor(indices[i][j]))
+            dense_embedding = torch.mean(embeddings, dim=0)
+            movie_embeddings.append(dense_embedding)
+        dense_embeddings.append(torch.stack(movie_embeddings))
+    dense_embeddings = torch.stack(dense_embeddings)
+    return dense_embeddings
