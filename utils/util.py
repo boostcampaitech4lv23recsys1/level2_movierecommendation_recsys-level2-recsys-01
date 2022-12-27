@@ -53,6 +53,29 @@ def neg_sample(item_set, item_size):
         item = random.randint(1, item_size - 1)
     return item
 
+def get_user_seqs_long(data_file):
+    rating_df = pd.read_csv(data_file)
+    lines = rating_df.groupby("user")["item"].apply(list)
+    user_seq = []
+    long_sequence = []
+    item_set = set()
+    for line in lines:
+        items = line
+        long_sequence.extend(items)
+        user_seq.append(items)
+        item_set = item_set | set(items)
+    max_item = max(item_set)
+
+    return user_seq, max_item, long_sequence
+
+def get_item2attribute_json(data_file):
+    item2attribute = json.loads(open(data_file).readline())
+    attribute_set = set()
+    for item, attributes in item2attribute.items():
+        attribute_set = attribute_set | set(attributes)
+    attribute_size = max(attribute_set)
+    return item2attribute, attribute_size
+
 FEATURES = [
     "userID",
     "assessmentItemID",
