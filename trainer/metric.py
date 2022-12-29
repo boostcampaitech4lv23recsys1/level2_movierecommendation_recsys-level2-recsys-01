@@ -4,14 +4,10 @@
 ex) Accuracy, NDCG, recall 등
 """
 import torch
-from sklearn.metrics import roc_auc_score, accuracy_score
 import numpy as np
+import math
 
 from typing import Union
-
-
-def accuracy(output, target):
-    return accuracy_score(target, np.where(output >= 0.5, 1, 0))
 
 
 def top_k_acc(output, target, k=3):
@@ -24,10 +20,6 @@ def top_k_acc(output, target, k=3):
             correct += torch.sum(pred[:, i] == target).item()
 
     return correct / len(target)
-
-
-def auc_roc(output, target):
-    return roc_auc_score(target, output)
 
 
 def recall_at_k(
@@ -57,15 +49,37 @@ def recall_at_k(
     return sum_recall / true_users
 
 
+def ndcg_k(actual, predicted, topk):
+    res = 0
+    for user_id in range(len(actual)):
+        k = min(topk, len(actual[user_id]))
+        idcg = idcg_k(k)
+        dcg_k = sum(
+            [
+                int(predicted[user_id][j] in set(actual[user_id])) / math.log(j + 2, 2)
+                for j in range(topk)
+            ]
+        )
+        res += dcg_k / idcg
+    return res / float(len(actual))
+
+
+# Calculates the ideal discounted cumulative gain at k
+def idcg_k(k):
+    res = sum([1.0 / math.log(i + 2, 2) for i in range(k)])
+    if not res:
+        return 1.0
+    else:
+        return res
+
+
 def get_metric(metric: str):
-    possible_metric = {"accuracy", "aucroc", "recall"}
+    possible_metric = {"recall", "ndcg"}
     if metric not in possible_metric:
         raise ValueError(
             f"{metric}은 지원되지 않는 metric 입니다.\n지원하는 metric 목록: {possible_metric}"
         )
-    if metric == "accuracy":
-        return accuracy
-    if metric == "aucroc":
-        return auc_roc
     if metric == "recall":
         return recall_at_k
+    if metric == "ndcg":
+        return ndcg_k
