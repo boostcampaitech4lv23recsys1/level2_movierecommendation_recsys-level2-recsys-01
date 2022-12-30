@@ -30,7 +30,7 @@ class Preprocess:
         )
 
     def __grouping_data(self, data: pd.DataFrame, column_name: str) -> pd.DataFrame:
-        return data.groupby("item")[column_name].apply(",".join).reset_index(drop=True)
+        return data.groupby("item")[column_name].apply(",".join).reset_index(drop=False)
 
     def __merge_data(self):
         self.director_data = self.__grouping_data(self.org_director_data, "director")
