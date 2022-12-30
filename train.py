@@ -4,11 +4,10 @@ from pytz import timezone
 from datetime import datetime
 import json
 
-import model as models
+from model import get_models
+from dataset import get_dataset
+from data_loader.base_data_loader import BaseDataLoader
 from data_loader.preprocess import Preprocess
-from dataset.dataset import BaseDataset, get_loader
-from sklearn.model_selection import KFold
-from trainer import BaseTrainer
 from utils import read_json, set_seed
 from logger import wandb_logger
 
@@ -18,122 +17,52 @@ import torch
 
 def main(config):
     print("---------------------------START PREPROCESSING---------------------------")
-    preprocess = Preprocess(config)
-    data = preprocess.load_train_data()
-
-    print("-------------------------using cat coloumn list-------------------------")
-    print(config["cat_cols"])
-    print("-------------------------using num coloumn list-------------------------")
-    print(config["num_cols"])
+    data = Preprocess(config).preprocessing()
     print("---------------------------DONE PREPROCESSING----------------------------")
+
+    print("---------------------------START DATASET---------------------------")
+    raise NotImplementedError("train, valid dataset dataloader 아직 안됨")
+
+    # train, valid 분리 방법 통일 필요
+    train_set = get_dataset(data, None, config)
+    valid_set = get_dataset(data, None, config)
+    print("---------------------------DONE DATASET---------------------------")
+
+    print("---------------------------START DATALOADER---------------------------")
+    # 일단 config에 들어가 있는거 넣는 식으로 해놨음. valid를 어떻게 잘 빼올 수 있는 것 처럼 보이긴 함
+    train_dataloader = BaseDataLoader(
+        train_set,
+        config["data_loader"]["batch_size"],
+        config["data_loader"]["shuffle"],
+        config["data_loader"]["validation_split"],
+        config["data_loader"]["num_workers"],
+    )
+    valid_dataloader = BaseDataLoader(
+        valid_set,
+        config["data_loader"]["batch_size"],
+        config["data_loader"]["shuffle"],
+        config["data_loader"]["validation_split"],
+        config["data_loader"]["num_workers"],
+    )
+    print("---------------------------DONE DATALOADER---------------------------")
+
+    print("---------------------------START MODEL LOADING---------------------------")
+    model = get_models(config)
+    print("---------------------------DONE MODEL LOADING---------------------------")
+
+    trainer = None
+
+    print("---------------------------START TRAINING---------------------------")
     now = datetime.now(timezone("Asia/Seoul")).strftime(f"%Y-%m-%d_%H:%M")
-
-    print("-----------------------------START TRAINING------------------------------")
-    if "sweep" in config:
-        wandb_train_func = functools.partial(
-            run_kfold_sweep, config["preprocess"]["num_fold"], config, data, now
-        )
-        sweep_config = json.loads(json.dumps(config["sweep"]))
-        sweep_id = wandb.sweep(
-            sweep_config, entity=config["entity"], project=config["project"]
-        )
-        wandb.agent(sweep_id, function=wandb_train_func)
-    else:
-        run_kfold(config["preprocess"]["num_fold"], config, data, now)
+    wandb.init(
+        project=config["project"],
+        entity=config["entity"],
+        name=f'{now}_{config["user"]}',
+    )
+    wandb.watch(model)
+    trainer.train()
+    wandb.finish()
     print("---------------------------DONE TRAINING---------------------------")
-
-
-def run_kfold_sweep(k, config, data, now):
-    kf = KFold(n_splits=k, shuffle=True, random_state=config["trainer"]["seed"])
-    wandb.init(name=f'{now}_{config["user"]}_sweep')
-    wandb_logger.sweep_update(config, wandb.config)
-    val_fold = 0
-    for fold, (train_idx, val_idx) in enumerate(
-        kf.split(data["userID"].unique().tolist())
-    ):
-        print(
-            f"-------------------------START FOLD {fold + 1} TRAINING---------------------------"
-        )
-        print(
-            f"-------------------------START FOLD {fold + 1} MODEL LOADING----------------------"
-        )
-
-        model = models.get_models(config)
-
-        print(
-            f"-------------------------DONE FOLD {fold + 1} MODEL LOADING-----------------------"
-        )
-
-        train_set = BaseDataset(data, train_idx, config)
-        val_set = BaseDataset(data, val_idx, config)
-
-        train, valid = get_loader(train_set, val_set, config["data_loader"]["args"])
-
-        trainer = BaseTrainer(
-            model=model,
-            train_data_loader=train,
-            valid_data_loader=valid,
-            config=config,
-            fold=fold + 1,
-        )
-
-        result = trainer.train()
-        wandb.log(result, step=fold + 1)
-        val_fold += result["val_aucroc"]
-        print(
-            f"---------------------------DONE FOLD {fold + 1} TRAINING--------------------------"
-        )
-    wandb.log({"val_fold": val_fold / k})
-
-
-def run_sweep():
-    pass
-
-
-def run_kfold(k, config, data, now):
-    kf = KFold(n_splits=k, shuffle=True, random_state=config["trainer"]["seed"])
-
-    for fold, (train_idx, val_idx) in enumerate(
-        kf.split(data["userID"].unique().tolist())
-    ):
-        print(
-            f"-------------------------START FOLD {fold + 1} TRAINING---------------------------"
-        )
-        print(
-            f"-------------------------START FOLD {fold + 1} MODEL LOADING----------------------"
-        )
-
-        model = models.get_models(config)
-
-        wandb.init(
-            project=config["project"],
-            entity=config["entity"],
-            name=f'{now}_{config["user"]}_fold_{fold+1}',
-        )
-        wandb.watch(model)
-
-        print(
-            f"-------------------------DONE FOLD {fold + 1} MODEL LOADING-----------------------"
-        )
-
-        train_set = BaseDataset(data, train_idx, config)
-        val_set = BaseDataset(data, val_idx, config)
-
-        train, valid = get_loader(train_set, val_set, config["data_loader"]["args"])
-
-        trainer = BaseTrainer(
-            model=model,
-            train_data_loader=train,
-            valid_data_loader=valid,
-            config=config,
-            fold=fold + 1,
-        )
-
-        trainer.train()
-        print(
-            f"---------------------------DONE FOLD {fold + 1} TRAINING--------------------------"
-        )
-        wandb.finish()
 
 
 if __name__ == "__main__":
@@ -141,9 +70,9 @@ if __name__ == "__main__":
     args.add_argument(
         "-c",
         "--config",
-        default="./LSTM_Test.json",
+        default="config/testconfig.json",
         type=str,
-        help='config 파일 경로 (default: "./config.json")',
+        help='config 파일 경로 (default: "config/testconfig.json")',
     )
     args = args.parse_args()
     config = read_json(args.config)
