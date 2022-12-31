@@ -13,18 +13,6 @@ class SeqNegPreDataset(SeqDataset):
     ) -> None:
         # user_seq, long_sequence 구한 것을 받는 형태로 작동
         super().__init__(**kwargs)
-        # preprocess.py에서 val2idx 하고 넘겨줘야 함
-        self.cur_cat_col = [f"{col}2idx" for col in self.config["cat_cols"]] + ["user"]
-        self.cur_num_col = self.config["num_cols"] + ["user"]
-
-        self.X_cat = self.data.loc[:, self.cur_cat_col].copy()
-        self.X_num = self.data.loc[:, self.cur_num_col].copy()
-
-        self.X_cat = self.X_cat.groupby("user")
-        self.X_num = self.X_num.groupby("user")
-
-        self.group_data = self.data.groupby("user")
-
         self.user_seq = user_seq # 유저별 본 영화 시퀀스
         self.long_sequence = long_sequence # data상 모든 영화 나열
         self.part_sequence = [] # 시퀀스를 계단식으로 쪼갤것임
@@ -143,4 +131,82 @@ class SeqNegPreDataset(SeqDataset):
 
 
 class SeqNegDataset(SeqDataset):
-    raise NotImplementedError
+    def __init__(
+        self, 
+        user_seq, 
+        data_type="train",
+        test_neg_items = None,
+        **kwargs
+        ) -> None:
+        super.__init__(**kwargs)
+        self.user_seq = user_seq
+        self.test_neg_items = test_neg_items
+        self.data_type = data_type
+
+    def __len__(self) -> int:
+        return len(self.user_seq)
+
+    def __getitem__(self, index) -> Tuple[torch.tensor, ...]:
+        user_id = index
+        items = self.user_seq[index]
+
+        assert self.data_type in {"train", "valid", "test", "submission"}
+
+        if self.data_type == "train":
+            input_ids = items[:-3]
+            target_pos = items[1:-2]
+            answer = [0]  # no use
+
+        elif self.data_type == "valid":
+            input_ids = items[:-2]
+            target_pos = items[1:-1]
+            answer = [items[-2]]
+
+        elif self.data_type == "test":
+            input_ids = items[:-1]
+            target_pos = items[1:]
+            answer = [items[-1]]
+        else:
+            input_ids = items[:]
+            target_pos = items[:]  # will not be used
+            answer = []
+
+        target_neg = []
+        seq_set = set(items)
+        for _ in input_ids:
+            target_neg.append(neg_sample(seq_set, self.args.item_size))
+        
+        pad_len = self.max_seq_len - len(input_ids)
+        input_ids = [0] * pad_len + input_ids
+        target_pos = [0] * pad_len + target_pos
+        target_neg = [0] * pad_len + target_neg
+
+        input_ids = input_ids[-self.max_seq_len :]
+        target_pos = target_pos[-self.max_seq_len :]
+        target_neg = target_neg[-self.max_seq_len :]
+
+        assert len(input_ids) == self.max_seq_len
+        assert len(target_pos) == self.max_seq_len
+        assert len(target_neg) == self.max_seq_len
+
+        if self.test_neg_items is not None:
+            test_samples = self.test_neg_items[index]
+
+            cur_tensors = (
+                torch.tensor(user_id, dtype=torch.long),  # user_id for testing
+                torch.tensor(input_ids, dtype=torch.long),
+                torch.tensor(target_pos, dtype=torch.long),
+                torch.tensor(target_neg, dtype=torch.long),
+                torch.tensor(answer, dtype=torch.long),
+                torch.tensor(test_samples, dtype=torch.long),
+            )
+        else:
+            cur_tensors = (
+                torch.tensor(user_id, dtype=torch.long),  # user_id for testing
+                torch.tensor(input_ids, dtype=torch.long),
+                torch.tensor(target_pos, dtype=torch.long),
+                torch.tensor(target_neg, dtype=torch.long),
+                torch.tensor(answer, dtype=torch.long),
+            )
+
+        return cur_tensors
