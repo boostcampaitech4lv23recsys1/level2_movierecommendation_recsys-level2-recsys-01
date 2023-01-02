@@ -4,9 +4,11 @@ seed: 417
 state: INFO
 reproducibility: true
 data_path: ./data
-dataset: MR
+dataset: MR_label_cut_False
 show_progress: true
 save_dataset: true
 save_dataloaders: true
 log_wandb: false
 wandb_project: movie-recbole
+
+running_model: SASRecF

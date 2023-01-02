@@ -114,11 +114,11 @@ class MRDataset(BaseDataset):
 
     def __init__(self, input_path, output_path, atomic_label, atomic_cut):
         super(MRDataset, self).__init__(input_path, output_path)
-        self.dataset_name = "MR"
         self.atomic_label = atomic_label
         self.atomic_cut = atomic_cut
 
         if self.atomic_label:
+            self.dataset_name = f"MR_label_cut_{self.atomic_cut}"
             self.inter_file = os.path.join(self.input_path, "train_labels.csv")
             self.inter_fields = {
                 0: "user:token",
@@ -127,6 +127,7 @@ class MRDataset(BaseDataset):
                 3: "label:float",
             }
         else:
+            self.dataset_name = f"MR_cut_{self.atomic_cut}"
             self.inter_file = os.path.join(self.input_path, "train_ratings.csv")
             self.inter_fields = {0: "user:token", 1: "item:token", 2: "time:float"}
         self.item_file = os.path.join(self.input_path, "item.csv")
@@ -161,7 +162,7 @@ class MRDataset(BaseDataset):
             )
         else:
             df = pd.read_csv(
-                self.inter_File,
+                self.inter_file,
                 delimiter='\t',
                 dtype={'user': 'object', 'item': 'object', 'time': 'float'},
             )

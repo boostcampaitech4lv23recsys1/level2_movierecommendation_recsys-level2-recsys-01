@@ -1,0 +1,21 @@
+# Extension of SASRec, which concatenates items and items' features as the input
+
+hidden_size: 256
+n_layers: 4
+n_heads: 8
+inner_size: 256
+hidden_dropout_prob: 0.5
+attn_dropout_prob: 0.3
+hidden_act: 'gelu'
+layer_norm_eps: 1e-12
+initializer_range: 0.02
+selected_features: ['item']
+pooling_mode: 'sum'
+loss_type: 'BPR'
+train_neg_sample_args:
+  strategy: uniform
+  sample_num: 5
+  dynamic: true
+fusion_type: gate
+lamdas: [10]
+attribute_predictor: linear
