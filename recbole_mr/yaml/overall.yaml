@@ -11,4 +11,4 @@ save_dataloaders: true
 log_wandb: false
 wandb_project: movie-recbole
 
-running_model: SASRecF
+running_model: SASRecD

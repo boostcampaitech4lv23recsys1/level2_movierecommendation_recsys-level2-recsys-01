@@ -7,8 +7,9 @@ data_save_path: './data'
 atomic_label: True
 atomic_cut: False
 
-field_separator: \t
+field_separator: '	'
 seq_separator: 
+seq_len: {}
 
 # Basic information
 USER_ID_FIELD: user
