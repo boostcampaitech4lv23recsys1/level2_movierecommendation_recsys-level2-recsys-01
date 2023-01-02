@@ -3,7 +3,7 @@ from tqdm import tqdm
 from recbole.quick_start import run_recbole
 import yaml
 from yaml.loader import SafeLoader
-from model import *
+from model.SASRecD import SASRecD
 
 
 if __name__ == "__main__":
@@ -11,12 +11,4 @@ if __name__ == "__main__":
         config = yaml.load(f, Loader=SafeLoader)
     running_model = config['running_model']
 
-    run_recbole(
-        model=running_model,
-        config_file_list=[
-            './yaml/overall.yaml',
-            './yaml/training.yaml',
-            f'./yaml/{running_model}.yaml',
-            './yaml/evaluation.yaml',
-        ],
-    )
+    run_recbole(model=running_model, config_file_list=['./yaml/MR_label_test.yaml'])
