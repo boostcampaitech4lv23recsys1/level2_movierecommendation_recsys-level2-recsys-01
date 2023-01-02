@@ -8,7 +8,7 @@ import torch
 from torch import nn
 
 from recbole.model.abstract_recommender import SequentialRecommender
-from model.layer.layers import FeatureSeqEmbLayer, DIFTransformerEncoder
+from layer.layers import FeatureSeqEmbLayer, DIFTransformerEncoder
 from recbole.model.loss import BPRLoss
 import copy
 
