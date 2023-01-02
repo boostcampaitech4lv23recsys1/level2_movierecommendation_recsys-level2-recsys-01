@@ -4,6 +4,7 @@ seed: 417
 state: INFO
 reproducibility: true
 data_path: ./data
+checkpoint_dir: ./saved
 dataset: MR_label_cut_False
 show_progress: true
 save_dataset: true
