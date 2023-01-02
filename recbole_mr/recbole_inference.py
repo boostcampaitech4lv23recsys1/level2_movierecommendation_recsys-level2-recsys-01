@@ -9,7 +9,7 @@ import yaml
 from yaml.loader import SafeLoader
 
 if __name__ == "__main__":
-    with open('./recbole_mr/yaml/inference.yaml') as f:
+    with open('./yaml/inference.yaml') as f:
         config = yaml.load(f, Loader=SafeLoader)
 
     user = pd.read_csv(config['submission_file_path'])
@@ -39,8 +39,10 @@ if __name__ == "__main__":
     int_iid = total_topk_iid_list.to(torch.int64)
     external_item_list = dataset.id2token(dataset.iid_field, int_iid.cpu())
     external_item_list = external_item_list.flatten()
-    df = pd.DataFrame({'user': user_index, 'item': external_item_list})
+    df = pd.DataFrame({'user': np.repeat(user_index, 10), 'item': external_item_list})
     df.to_csv(
-        os.path.join(config['inference_file_path'], config['model_name'] + '.csv'),
+        os.path.join(
+            config['inference_file_path'], f'submission_{config["model_name"]}.csv'
+        ),
         index=False,
     )

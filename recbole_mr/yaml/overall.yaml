@@ -6,7 +6,7 @@ reproducibility: true
 data_path: ./data
 checkpoint_dir: ./saved
 dataset: MR_label_cut_False
-show_progress: true
+show_progress: trude
 save_dataset: true
 save_dataloaders: true
 log_wandb: false
