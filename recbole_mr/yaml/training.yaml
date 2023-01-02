@@ -1,0 +1,10 @@
+# training settings
+epochs: 200
+train_batch_size: 2048
+learner: adam
+learning_rate: 0.001
+train_neg_sample_args: 
+  dynamic: true
+eval_step: 2
+stopping_step: 10
+weight_decay: 0.0

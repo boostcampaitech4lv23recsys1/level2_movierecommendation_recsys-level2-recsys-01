@@ -1,0 +1,12 @@
+# general
+use_gpu: false
+seed: 417
+state: INFO
+reproducibility: true
+data_path: ./data
+dataset: MR
+show_progress: true
+save_dataset: true
+save_dataloaders: true
+log_wandb: false
+wandb_project: movie-recbole
