@@ -1,0 +1,103 @@
+
+gpu_id: 0
+use_gpu: True
+seed: 417
+state: INFO
+reproducibility: False
+data_path: ./data
+checkpoint_dir: ./saved
+dataset: MR_label_cut_False
+show_progress: True
+save_dataset: False
+save_dataloaders: False
+running_model: SASRecD
+
+field_separator: '	'
+seq_separator:
+
+USER_ID_FIELD: user
+ITEM_ID_FIELD: item
+RATING_FIELD: ~
+TIME_FIELD: time
+LABEL_FIELD: label
+
+seq_len: {}
+
+
+NEG_PREFIX: neg_
+
+ITEM_LIST_LENGTH_FIELD: item_length
+LIST_SUFFIX: _list
+MAX_ITEM_LIST_LENGTH: 100
+POSITION_FIELD: position_id
+
+load_col:
+    inter: [user, item, time]
+    item: [item, title, year, director, writer, genre]
+unload_col: ~
+unused_col: ~
+encoding: utf-8-sig
+
+rm_dup_inter: first
+val_interval: ~
+filter_inter_by_user_or_item: True
+user_inter_num_interval: '[5,inf)'
+item_inter_num_interval: '[5,inf)'
+benchmark_filename: 
+additional_feat_suffix:
+
+# Preprocessing
+alias_of_user_id: ~
+alias_of_item_id: ~
+alias_of_entity_id: ~
+alias_of_relation_id: ~
+preload_weight: ~
+normalize_field: ~
+normalize_all: 
+
+n_layers: 4
+n_heads: 8
+hidden_size: 256
+attribute_hidden_size: [128]
+inner_size: 256
+hidden_dropout_prob: 0.5
+attn_dropout_prob: 0.3
+hidden_act: 'gelu'
+layer_norm_eps: 1e-12
+initializer_range: 0.02
+selected_features: ['item']
+pooling_mode: 'sum'
+loss_type: 'BPR'
+train_neg_sample_args:
+  strategy: 'uniform'
+  sample_num: 5
+  dynamic: true
+fusion_type: gate
+lamdas: [10]
+attribute_predictor: linear
+
+epochs: 100
+train_batch_size: 1024
+learner: adam
+learning_rate: 0.0001
+eval_step: 1
+stopping_step: 10
+clip_grad_norm: ~
+weight_decay: 0.0
+
+eval_args:
+  split:
+    LS:
+      valid_and_test
+  group_by: user
+  order: TO
+  mode: full
+
+repeatable: True
+metrics: ["Recall","NDCG"]
+topk: 10
+valid_metric: Recall@10
+valid_metric_bigger: True
+eval_batch_size: 32
+loss_decimal_place: 8
+metric_decimal_place: 8
