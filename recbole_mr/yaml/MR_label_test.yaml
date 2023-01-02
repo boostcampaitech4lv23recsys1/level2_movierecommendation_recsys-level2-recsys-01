@@ -10,7 +10,7 @@ dataset: MR_label_cut_False
 show_progress: True
 save_dataset: False
 save_dataloaders: False
-running_model: SASRecD
+running_model: SASRecF
 
 field_separator: '	'
 seq_separator:
