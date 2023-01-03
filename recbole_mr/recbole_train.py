@@ -29,12 +29,12 @@ def run(args):
         config_dict (dict, optional): Parameters dictionary used to modify experiment parameters. Defaults to ``None``.
         saved (bool, optional): Whether to save the model. Defaults to ``True``.
     """
-
     # configurations initialization
+    config = args
     config = Config(
-        model=args.config_file.split("/")[-1],
-        dataset="MR",
-        config_file_list=[args.config_file],
+        model=config.config_file.split("/")[-1][:-5],
+        dataset=config.dataset_name,
+        config_file_list=[config.config_file],
     )
 
     init_seed(config["seed"], config["reproducibility"])
@@ -87,5 +87,6 @@ def run(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file", type=str, default=None)
+    parser.add_argument("--dataset_name", type=str, default="MR")
     args = parser.parse_args()
     run(args)
