@@ -2,6 +2,11 @@ from logging import getLogger
 import argparse
 import sys
 
+import wandb
+
+from pytz import timezone
+from datetime import datetime
+
 from recbole.config import Config
 from recbole.data import (
     create_dataset,
@@ -35,6 +40,14 @@ def run(args):
         model=config.config_file.split("/")[-1][:-5],
         dataset=config.dataset_name,
         config_file_list=[config.config_file],
+    )
+
+    # wandb setting
+    now = datetime.now(timezone("Asia/Seoul")).strftime(f"%Y-%m-%d_%H:%M")
+    wandb.init(
+        project=f"RecBole",
+        entity="movierec-dinosaur",
+        name=f"{args.config_file[5:-5]}_{now}_{args.user}",
     )
 
     init_seed(config["seed"], config["reproducibility"])
@@ -88,5 +101,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config_file", type=str, default=None)
     parser.add_argument("--dataset_name", type=str, default="MR")
+    parser.add_argument("--user", type=str, default=None)
     args = parser.parse_args()
     run(args)

@@ -87,6 +87,11 @@ data/
 
 # save model folder
 saved_model/
+saved/
+
+# log
+log/
+log_tensorboard/
 
 # submission folder
 submission/
