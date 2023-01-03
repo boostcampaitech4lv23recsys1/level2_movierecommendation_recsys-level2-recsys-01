@@ -3,10 +3,10 @@ use_gpu: true
 seed: 417
 state: INFO
 reproducibility: true
-data_path: ./data
+data_path: '../../input/data/recbole/'
 checkpoint_dir: ./saved
-dataset: MR_label_cut_False
-show_progress: trude
+dataset: MR
+show_progress: true
 save_dataset: true
 save_dataloaders: true
 log_wandb: false
