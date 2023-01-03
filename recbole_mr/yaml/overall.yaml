@@ -1,5 +1,5 @@
 # general
-use_gpu: false
+use_gpu: true
 seed: 417
 state: INFO
 reproducibility: true
@@ -11,5 +11,4 @@ save_dataset: true
 save_dataloaders: true
 log_wandb: false
 wandb_project: movie-recbole
-
-running_model: SASRecD
+device: 'cuda: 0'

@@ -7,6 +7,7 @@ Reference:
 import torch
 from torch import nn
 
+from recbole.utils import InputType
 from recbole.model.abstract_recommender import SequentialRecommender
 from layer.layers import FeatureSeqEmbLayer, DIFTransformerEncoder
 from recbole.model.loss import BPRLoss
@@ -14,6 +15,7 @@ import copy
 
 
 class SASRecD(SequentialRecommender):
+    input_type = InputType.PAIRWISE
     """
     DIF-SR moves the side information from the input to the attention layer and decouples the attention calculation of
     various side information and item representation

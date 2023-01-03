@@ -10,10 +10,10 @@ dataset: MR_label_cut_False
 show_progress: True
 save_dataset: False
 save_dataloaders: False
-running_model: SASRecD
+running_model: SASRecF
 
 field_separator: '	'
-seq_separator:
+seq_separator: 
 
 USER_ID_FIELD: user
 ITEM_ID_FIELD: item
@@ -32,8 +32,17 @@ MAX_ITEM_LIST_LENGTH: 100
 POSITION_FIELD: position_id
 
 load_col:
-    inter: [user, item, time]
-    item: [item, title, year, director, writer, genre]
+    inter: 
+    - user
+    - item
+    - time
+    item:
+    - item
+    - title
+    - year
+    - director
+    - writer
+    - genre]
 unload_col: ~
 unused_col: ~
 encoding: utf-8-sig
@@ -43,8 +52,6 @@ val_interval: ~
 filter_inter_by_user_or_item: True
 user_inter_num_interval: '[5,inf)'
 item_inter_num_interval: '[5,inf)'
-benchmark_filename: 
-additional_feat_suffix:
 
 # Preprocessing
 alias_of_user_id: ~
@@ -53,7 +60,7 @@ alias_of_entity_id: ~
 alias_of_relation_id: ~
 preload_weight: ~
 normalize_field: ~
-normalize_all: 
+normalize_all: ~
 
 n_layers: 4
 n_heads: 8
@@ -68,21 +75,19 @@ initializer_range: 0.02
 selected_features: ['item']
 pooling_mode: 'sum'
 loss_type: 'BPR'
-train_neg_sample_args:
-  strategy: 'uniform'
-  sample_num: 5
-  dynamic: true
-fusion_type: gate
 lamdas: [10]
 attribute_predictor: linear
 
 epochs: 100
 train_batch_size: 1024
 learner: adam
-learning_rate: 0.0001
+learning_rate: 0.001
+train_neg_sample_args:
+  distribution: popularity
+  sample_num: 5
+  dynamic: true
 eval_step: 1
 stopping_step: 10
-clip_grad_norm: ~
 weight_decay: 0.0
 
 eval_args:
@@ -94,7 +99,9 @@ eval_args:
   mode: full
 
 repeatable: True
-metrics: ["Recall","NDCG"]
+metrics:
+  - Recall
+  - NDCG
 topk: 10
 valid_metric: Recall@10
 valid_metric_bigger: True
