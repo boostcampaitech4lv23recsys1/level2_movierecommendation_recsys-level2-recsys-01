@@ -1,0 +1,42 @@
+# 공통 사항
+# 괄호에 써있는 것은 Recbole이 제공하는 기본값
+# 기본값을 사용하고 싶다면 그냥 해당 줄을 지워버리면 된다. 
+
+# 1. Environment
+seed: 417
+data_path: data/
+dataset: MR
+log_wandb: true
+wandb_project: RecBole
+
+# 2. Data
+USER_ID_FIELD: user
+ITEM_ID_FIELD: item
+RATING_FIELD: ~
+TIME_FIELD: time
+load_col: ~
+rm_dup_inter: first
+
+# 3. Training
+epochs: 원하는 에폭 (300)
+train_batch_size: 원하는 배치 (2048)
+learning_rate: 원하는 lr (0.001)
+train_neg_sample_args: # 모델에 따라 neg sampling이 불가능한 모델도 있음 해당 경우 ~ 으로 설정. ex. MultiVAE
+    sample_num: 5 (1)
+eval_step: 원하는 eval step (1)
+stopping_step: early stopping (10)
+weight_decay: 0.001 (0)
+
+# 4. Evaluation
+eval_args:
+    group_by: user
+    order: (Sequence면 TO, General은 RO)
+    split: 
+        LS: valid_and_test
+    mode: full
+metrics: Recall
+topk: 10
+valid_metric: Recall@10
+eval_batch_size: 원하는 eval batch (4096)
+
+# 이제 여기 아래에 모델 설정 넣기
