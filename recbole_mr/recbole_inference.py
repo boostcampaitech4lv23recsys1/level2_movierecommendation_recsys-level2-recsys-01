@@ -14,6 +14,8 @@ if __name__ == "__main__":
 
     user = pd.read_csv(config['submission_file_path'])
     user_index = np.array(user['user'].drop_duplicates(), dtype=str)
+    inf_path = config['inference_save_path'] # dir is required. make dir yourself
+    inf_name = config['model_name']
 
     config, model, dataset, train_data, valid_data, test_data = load_data_and_model(
         model_file=os.path.join(config['model_path'], config['model_name'])
@@ -21,7 +23,6 @@ if __name__ == "__main__":
     del train_data, valid_data
 
     uid_series = dataset.token2id(dataset.uid_field, user_index)
-
     total_topk_score, total_topk_iid_list = torch.zeros_like(
         torch.Tensor(31360, 10)
     ), torch.zeros_like(torch.Tensor(31360, 10))
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     df = pd.DataFrame({'user': np.repeat(user_index, 10), 'item': external_item_list})
     df.to_csv(
         os.path.join(
-            config['inference_file_path'], f'submission_{config["model_name"]}.csv'
+            inf_path, f'submission_{inf_name}.csv'
         ),
         index=False,
     )
