@@ -32,7 +32,9 @@ def run(args):
 
     # configurations initialization
     config = Config(
-        model=args.config_file[5:-5], dataset="MR", config_file_list=[args.config_file]
+        model=args.config_file.split("/")[-1],
+        dataset="MR",
+        config_file_list=[args.config_file],
     )
 
     init_seed(config["seed"], config["reproducibility"])
