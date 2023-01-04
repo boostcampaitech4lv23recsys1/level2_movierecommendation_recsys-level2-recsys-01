@@ -27,18 +27,35 @@ class Ensemble:
                 first['item'][i].extend(csv['item'][i])
         return first
 
-    def merge_item_weighted1(self, csv_list, weight):
-        first = csv_list[0]
-        first['item'] = first['item'].apply(item2score, score = weight[0])
+    # def merge_item_weighted1(self, csv_list, weight):
+    #     first = csv_list[0]
+    #     first['item'] = first['item'].apply(item2score, score = weight[0])
+
+    #     print("...calculating...")
+    #     for i in tqdm(range(len(first))):
+    #         for csv, wei in zip(csv_list[1:], weight[1:]):
+    #             for c in csv['item'][i]:
+    #                 if first['item'][i].get(c):
+    #                     first['item'][i][c] += wei
+    #                 else:
+    #                     first['item'][i][c] = wei
+    #     return first
+    
+    def merge_item_weighted(self, df_list, weight1, decay):
+        first = df_list[0]
+        first['item'] = first['item'].apply(item2score, score = 0)
 
         print("...calculating...")
         for i in tqdm(range(len(first))):
-            for csv, wei in zip(csv_list[1:], weight[1:]):
-                for c in csv['item'][i]:
-                    if first['item'][i].get(c):
-                        first['item'][i][c] += wei
+            for df, wei in zip(df_list, weight1):
+                order = 0
+                for movie in df['item'][i]:
+                    ratio = 1 - (decay * order) 
+                    if movie in first['item'][i]:
+                        first['item'][i][movie] += (wei * ratio)
                     else:
-                        first['item'][i][c] = wei
+                        first['item'][i][movie] = (wei * ratio)
+                    order += 1
         return first
 
     def hard(self):
@@ -46,13 +63,13 @@ class Ensemble:
         merge_csv['item'] = merge_csv['item'].apply(topten)
         return merge_csv.explode(column=['item'])
 
-    def weighted(self, weight: list):
-        merge_csv = self.merge_item_weighted1(self.output_list, weight)
-        merge_csv['item'] = merge_csv['item'].apply(topten_weighted1)
+    def weighted(self, weight: list, decay: float):
+        merge_csv = self.merge_item_weighted(self.output_list, weight, decay)
+        merge_csv['item'] = merge_csv['item'].apply(topten_weighted)
         merge_csv = merge_csv.explode(column=['item'])
         return merge_csv
 
-def topten_weighted1(i):
+def topten_weighted(i):
     temp = sorted(i.items(), key=lambda x: x[1], reverse=True)[:10]
     temp = [t[0] for t in temp]
     return temp
