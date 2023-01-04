@@ -15,11 +15,17 @@ def main(args):
     en = Ensemble(filepath=filepath)
 
     if args.STRATEGY == "HARD":
+        print("your choice: Hard / Weighted1 None / Weighted2 None")
         strategy_title = 'Hard'
         result = en.hard()
     elif args.STRATEGY == "WEIGHTED":
-        strategy_title = 'Weight'+'-'.join(map(str,*args.ENSEMBLE_WEIGHT))
-        result = en.weighted(*args.ENSEMBLE_WEIGHT)
+        if args.WEIGHT1:
+            print(f"your choice: Weighted / Weighted1 {args.WEIGHT1} / Weighted2 None")
+            strategy_title = 'Weight1'+'-'.join(map(str,*args.WEIGHT1))
+            result = en.weighted(*args.WEIGHT1)
+        else:
+            strategy_title = 'Hard'
+            result = en.hard()
     
     now = datetime.now(timezone("Asia/Seoul")).strftime(f"%Y-%m-%d_%H:%M")
     result.to_csv(f'{savepath}{now}-{strategy_title}.csv',index=False)
@@ -35,9 +41,12 @@ if __name__=="__main__":
     arg('--STRATEGY', type=str, default='HARD',
         choices=['HARD', 'WEIGHTED'],
         help='optional: [HARD, WEIGHTED] 중 앙상블 전략을 선택해 주세요. (default="HARD")')
-    arg('--WEIGHT', nargs='+',default=None,
+    arg('--WEIGHT1', nargs='+',default=None,
         type=lambda s: [float(item) for item in s.split(',')],
-        help='optional: 각 결과값의 가중치를 조정할 수 있습니다. 입력하지 않으면 Hard Voting과 같습니다.')
+        help='optional: csv 사이의 가중치를 조정할 수 있습니다. 입력하지 않으면 Hard Voting과 같습니다.')
+    arg('--WEIGHT2', nargs='+',default=None,
+        type=lambda s: [float(item) for item in s.split(',')],
+        help='optional: 순위의 가중치를 조정할 수 있습니다. 입력하지 않으면 정해진 metric이 작동합니다.')
     arg('--RESULT_PATH',type=str, default='./ensembles_submit/',
         help='optional: 앙상블 결과를 저장할 폴더 경로를 전달합니다. (default:"./ensembles_submit/")')
     args = parser.parse_args()
