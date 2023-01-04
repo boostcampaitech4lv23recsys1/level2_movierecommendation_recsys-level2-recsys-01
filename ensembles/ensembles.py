@@ -16,8 +16,6 @@ class Ensemble:
 
         for path in output_path:
             self.output_list.append(pd.read_csv(path).groupby(["user"])['item'].apply(list).reset_index())
-        # for filename, output in zip(self.filenames, self.output_list):
-        #     self.output_df[filename] = output
     
     def merge_item_hard(self, csv_list):
         first = csv_list[0]
@@ -48,17 +46,17 @@ class Ensemble:
 
     def weighted(self, weight: list):
         merge_csv = self.merge_item_weighted1(self.output_list, weight)
-        merge_csv['item'] = merge_csv['item'].apply(topten_weighted1)
+        merge_csv['item'] = merge_csv['item'].apply(topten_weighted)
         merge_csv = merge_csv.explode(column=['item'])
         return merge_csv
-
-def topten_weighted1(i):
-    temp = sorted(i.items(), key=lambda x: x[1], reverse=True)[:10]
-    temp = [t[0] for t in temp]
-    return temp
 
 def item2score(item, score):
     return {i:score for i in item}
 
 def topten(i):
     return [ key for key, _ in Counter(i).most_common(10) ]
+
+def topten_weighted(i):
+    temp = sorted(i.items(), key=lambda x: x[1], reverse=True)[:10]
+    temp = [t[0] for t in temp]
+    return temp
