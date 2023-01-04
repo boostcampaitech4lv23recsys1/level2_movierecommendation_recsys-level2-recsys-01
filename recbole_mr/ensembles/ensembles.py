@@ -26,20 +26,6 @@ class Ensemble:
             for csv in csv_list[1:]:
                 first['item'][i].extend(csv['item'][i])
         return first
-
-    # def merge_item_weighted1(self, csv_list, weight):
-    #     first = csv_list[0]
-    #     first['item'] = first['item'].apply(item2score, score = weight[0])
-
-    #     print("...calculating...")
-    #     for i in tqdm(range(len(first))):
-    #         for csv, wei in zip(csv_list[1:], weight[1:]):
-    #             for c in csv['item'][i]:
-    #                 if first['item'][i].get(c):
-    #                     first['item'][i][c] += wei
-    #                 else:
-    #                     first['item'][i][c] = wei
-    #     return first
     
     def merge_item_weighted(self, df_list, weight1, decay):
         first = df_list[0]
