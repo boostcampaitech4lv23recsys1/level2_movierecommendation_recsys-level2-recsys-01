@@ -22,22 +22,28 @@ def main(args):
         strategy_title = 'H'
         result = en.hard()
     elif args.STRATEGY == "WEIGHTED":
-        if args.WEIGHT1 and not args.WEIGHT2:
-            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: {args.WEIGHT1[0]} \nWeighted2: None \n**********")
+        if args.WEIGHT1 and not args.WEIGHT2 and not args.WEIGHT3: # w o x x
+            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: {args.WEIGHT1[0]} \nWeighted2: None \nWeighted3: None \n**********")
             strategy_title = 'W1-'+'-'.join(map(str,*args.WEIGHT1))
             result = en.weighted(*args.WEIGHT1, args.WEIGHT2)
-        elif not args.WEIGHT1 and not args.WEIGHT2:
+        elif args.WEIGHT1 and not args.WEIGHT2 and args.WEIGHT3: # w o x o
+            raise NotImplementedError
+        elif not args.WEIGHT1 and not args.WEIGHT2 and not args.WEIGHT3: # w x x x
             print("**********")
-            print("--WEIGHT1, --WEIGHT2가 입력되지 않아 HARD Voting이 작동합니다.")
-            print(f"STRATEGY: HARD \nWeighted1: None \nWeighted2: None \n**********")
+            print("--WEIGHT1, --WEIGHT2, --WEIGHT3가 입력되지 않아 HARD Voting이 작동합니다.")
+            print(f"STRATEGY: HARD \nWeighted1: None \nWeighted2: None \nWeighted3: None \n**********")
             strategy_title = 'H'
             result = en.hard()
-        elif args.WEIGHT1 and args.WEIGHT2:
-            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: {args.WEIGHT1[0]} \nWeighted2: {args.WEIGHT2} \n**********")
+        elif not args.WEIGHT1 and not args.WEIGHT2 and args.WEIGHT3: # w x x o
+            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: None \nWeighted2: None \nWeighted3: {args.WEIGHT3[0]} \n**********")
+            strategy_title = 'W3-' + '-'.join(map(str, *args.WEIGHT3))
+            result = en.weighted3(*args.WEIGHT3)
+        elif args.WEIGHT1 and args.WEIGHT2: # w o o .
+            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: {args.WEIGHT1[0]} \nWeighted2: {args.WEIGHT2} \nWeighted3: None \n**********")
             strategy_title = 'W1-'+'-'.join(map(str,*args.WEIGHT1)) + '_W2-' + str(args.WEIGHT2)
             result = en.weighted(*args.WEIGHT1, args.WEIGHT2)
-        elif not args.WEIGHT1 and args.WEIGHT2:
-            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: None \nWeighted2: {args.WEIGHT2} \n**********")
+        elif not args.WEIGHT1 and args.WEIGHT2: # w x o .
+            print(f"********** \nSTRATEGY: {args.STRATEGY} \nWeighted1: None \nWeighted2: {args.WEIGHT2} \nWeighted3: None \n**********")
             strategy_title = 'W2-' + str(args.WEIGHT2)
             result = en.weighted([1] * en.csv_nums, args.WEIGHT2)
         else:
@@ -64,6 +70,9 @@ if __name__=="__main__":
         help='optional: csv 사이의 가중치를 조정할 수 있습니다. 입력하지 않으면 Hard Voting과 같습니다.')
     arg('--WEIGHT2', type=float,default=0,
         help='optional: 순위 가중치 decay를 조정할 수 있습니다. 입력하지 않으면 WEIGHT1만 작동합니다.')
+    arg('--WEIGHT3', nargs='+',default=None,
+        type=lambda s: [float(item) for item in s.split(',')],
+        help='optional: 순위 가중치를 임의로 설정할 수 있습니다. 입력하지 않으면 작동하지 않습니다.')
     arg('--RESULT_PATH',type=str, default='./ensembles_submit/',
         help='optional: 앙상블 결과를 저장할 폴더 경로를 전달합니다. (default:"./ensembles_submit/")')
     args = parser.parse_args()

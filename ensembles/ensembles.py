@@ -39,6 +39,19 @@ class Ensemble:
                     order += 1
         return first
     
+    def merge_arbitrary_weighted(self, df_list, weight):
+        score_df = df_list[0].copy()
+        score_df['item'] = score_df['item'].apply(item2score, score = 0)
+        print("...calculating...")
+        for i in tqdm(range(len(score_df))):
+            for df in df_list:
+                for order, movie in enumerate(df['item'][i]):
+                    if movie in score_df['item'][i]:
+                        score_df['item'][i][movie] += weight[order]
+                    else:
+                        score_df['item'][i][movie] = weight[order]
+        return score_df
+    
     def hard(self):
         merge_csv = self.merge_item_hard(self.output_list)
         merge_csv['item'] = merge_csv['item'].apply(topten)
@@ -46,6 +59,12 @@ class Ensemble:
     
     def weighted(self, weight: list, decay: float):
         merge_csv = self.merge_item_weighted(self.output_list, weight, decay)
+        merge_csv['item'] = merge_csv['item'].apply(topten_weighted)
+        merge_csv = merge_csv.explode(column=['item'])
+        return merge_csv
+    
+    def weighted3(self, weight: list):
+        merge_csv = self.merge_arbitrary_weighted(self.output_list, weight)
         merge_csv['item'] = merge_csv['item'].apply(topten_weighted)
         merge_csv = merge_csv.explode(column=['item'])
         return merge_csv
