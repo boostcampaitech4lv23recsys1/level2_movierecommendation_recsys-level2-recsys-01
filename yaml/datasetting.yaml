@@ -1,0 +1,54 @@
+# Data settings
+# Basic information of the dataset
+# Operations of dataset preprocessing
+
+data_load_path: '../../input/data/train'
+data_save_path: './data'
+atomic_label: True
+atomic_cut: False
+
+field_separator: '	'
+seq_separator: 
+seq_len: {}
+
+# Basic information
+USER_ID_FIELD: user
+ITEM_ID_FIELD: item
+RATING_FIELD: ~
+TIME_FIELD: time
+# Label for Point-wise DataLoader
+LABEL_FIELD: label
+# Negative Sampling Prefix for Pair-wise DataLoader
+NEG_PREFIX: neg_
+
+# Sequential Model Needed
+ITEM_LIST_LENGTH_FIELD: item_length
+LIST_SUFFIX: _list
+MAX_ITEM_LIST_LENGTH: 100
+POSITION_FIELD: position_id
+
+# Selectively Loading
+load_col:
+    inter: [user, item, time]
+    item: [item, title, year, director, writer, genre]
+unload_col: ~
+unused_col: ~
+encoding: utf-8-sig
+
+# Filtering
+rm_dup_inter: first
+val_interval: ~
+filter_inter_by_user_or_item: False
+user_inter_num_interval: '[5,inf)'
+item_inter_num_interval: '[5,inf)'
+benchmark_filename: 
+additional_feat_suffix:
+
+# Preprocessing
+alias_of_user_id: ~
+alias_of_item_id: ~
+alias_of_entity_id: ~
+alias_of_relation_id: ~
+preload_weight: ~
+normalize_field: ~
+normalize_all: ~

@@ -1,0 +1,14 @@
+# general
+use_gpu: true
+seed: 417
+state: INFO
+reproducibility: true
+data_path: '../../input/data/recbole/'
+checkpoint_dir: ./saved
+dataset: MR
+show_progress: true
+save_dataset: true
+save_dataloaders: true
+log_wandb: false
+wandb_project: movie-recbole
+device: 'cuda: 0'
