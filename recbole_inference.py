@@ -16,7 +16,7 @@ if __name__ == "__main__":
     user_index = np.array(user['user'].drop_duplicates(), dtype=str)
     inf_path = config['inference_save_path'] # dir is required. make dir yourself
     inf_name = config['model_name']
-    topk = 15 # inference 수
+    topk = config['topk'] # inference 수
     
     config, model, dataset, train_data, valid_data, test_data = load_data_and_model(
         model_file=os.path.join(config['model_path'], config['model_name'])
