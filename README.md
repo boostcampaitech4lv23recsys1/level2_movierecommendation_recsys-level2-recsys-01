@@ -2,7 +2,8 @@
 
 ## Movie Recommendation
 
-사용자의 영화 시청 이력 데이터를 바탕으로 사용자가 다음에 시청할 영화 및 좋아할 영화를 예측하는 대회입니다.
+사용자의 영화 시청 이력 데이터를 바탕으로 사용자가 다음에 시청할 영화 및 좋아할 영화를 예측하는 대회입니다.   
+MovieLens 데이터를 전처리 하여 implicit feedback 기반의 sequential recommendation 시나리오를 바탕으로 사용자의 time-ordered sequence에서 일부 item이 누락된 상황을 상정합니다. 아이템인 영화와 관련된 content(side-information)가 함께 제공됩니다. 위 상황에서 원본 데이터가 있다면 특정 시점 이후의 데이터(sequential)와 특정 시점 이전의 일부 데이터(static)를 임의로 추출하여 정답 데이터로 사용합니다.
 
 ## 프로젝트 목표
 
@@ -84,7 +85,7 @@ Movie Recommendation/
 
 ---
 
-# 3. 프로젝트 수행 결과 (Private 1위)
+# 3. 프로젝트 수행 결과 (Public 5위 / Private 8위)
 
 ---
 
