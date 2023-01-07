@@ -1,6 +1,7 @@
 
 model_path: './saved'
 model_name: 'SASRecF-Jan-02-2023_01-23-17.pth'
+topk: 15
 
 submission_file_path: '../../input/data/eval/sample_submission.csv'
 inference_save_path: './data/inference_files'
