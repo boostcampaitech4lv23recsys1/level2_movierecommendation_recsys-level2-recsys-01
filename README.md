@@ -34,62 +34,36 @@
 ```
 Movie Recommendation/
 │
-├── train.py - main script to start training
-├── inference.py - make submission with trained models
-├── ensemble.py - make ensemble with submission files
+├── dataset/
+│	  ├── datasets.py
+│	  └── preprocess.py
 │
-├── config/ - holds configurations for training
-|   ├──LSTM_config.json
-|   ├──transformer_config.json
-|   ├──transformerLSTM_config.json
-|   ├──GRUtransformer_config.json
-│   └──GTN_congfig.json
+├── ensembles/
+│	  └── ensembles.py
 │
-├── data_loader/ - anything about data loading goes here
-│   ├── dataset.py
-│   └── preprocess.py
+├── layer/
+│	  └── layers.py
+├── model/
+│	  └── SASRecD.py
 │
-├── data/ - default directory for storing input data
+├── yaml/
+│	  ├── default.yaml
+│	  ├── model1.yaml
+│	  ├── model2.yaml
+│	  ├── ...
+│	  └── inference.yaml
 │
-├── model/ - base, get_model, utils for model, and all of models
-│   ├── base.py
-│   ├── get_model.py
-│   ├── utils.py
-│   ├── LSTM.py
-│   ├── transformer.py
-│   ├── transformerLSTM.py
-│   ├── transformerGRU.py
-│   ├── GRUtransformer.py
-│   ├── GTN.py
-│   ├── GTNGRU.py
-│   └── XGBoost.py
-│
-├── trainer/ - trainers, losses, metric, optimizer, and scheduler
-│   ├── trainer.py
-│   ├── loss.py
-│   ├── metric.py
-│   ├── optimizer.py
-│   └── scheduler.py
-|
-├── preprocess/ - preprocess ipynb files
-│
-├── ensembles/ - anything about ensemble goes here
-│   └── ensemble.py
-|
-├── ensembles_inference/ - submission files that needs to be ensembled
-|
-├── logger/ - module for wandb  and logging
-│   └── wandb_logger.py
-│
-├── saved_model/
-|
-├── submission/
-|
-└── utils/ - small utility functions
-    ├── util.py
-    └── ...
+├── recbole_inference.py
+├── recbole_train.py
+└── topkensemble.py
 ```
 
+### 1.5 프로젝트 목표
+
+- Sequential한 특징이 약화된 Sequence 데이터를 잘 표현하는 모델 구현
+- 제한된 시간 내에 다양한 모델을 학습 시킬 수 있는 역량 배양
+    - 해당 경험을 극대화 하기 위한 RecBole 라이브러리 사용
+- 모델 유형(Sequential, Context-aware 등)에 따른 특징 파악
 ---
 
 # 2. 프로젝트 팀 구성 및 역할
