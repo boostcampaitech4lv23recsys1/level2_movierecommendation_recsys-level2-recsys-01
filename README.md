@@ -1,16 +1,19 @@
 # 1. 프로젝트 개요
 
-### 1.1 프로젝트 주제
+### 1.1 프로젝트 주제  
 <img src="https://user-images.githubusercontent.com/78770033/211195602-c5b75969-8575-43a4-b137-0b073b24b836.png">
-- 일반적인 영화 추천 대회의 경우, 사용자의 영화 시청 이력을 바탕으로 해당 사용자가 다음에 시청할 영화를 예측합니다.  
+
+- 일반적인 영화 추천 대회의 경우, 사용자의 영화 시청 이력을 바탕으로 해당 사용자가 다음에 시청할 영화를 예측합니다.   
 - 그러나 실제 상황에서는 서버 불량 등 여러가지 이유로 데이터가 Sequential하게 적재되지 않을 가능성이 존재합니다.  
 - 따라서 본 대회에서는 사용자의 영화 시청 이력을 바탕으로 당므에 시청할 영화 뿐 아니라 누락되었을 수 있는 영화 또한 예측하는 것을 목표로 합니다.  
 
 #### 1.1.1 데이터 개요
 <img src="https://user-images.githubusercontent.com/78770033/211195692-17c89cf8-0e8a-42e8-b9a1-02efb03ea04b.png">
-- MovieLens 데이터를 전처리 하여 만든 Implicit Feedback 기반의 Sequential Recommendation 시나리오를 바탕으로 사용자의 Time-ordered Sequence에서 일부 Item이 누락된 상황을 상정합니다.  
+
+- MovieLens 데이터를 전처리 하여 만든 Implicit Feedback 기반의 Sequential Recommendation 시나리오를 바탕으로 사용자의 Time-ordered Sequence에서 일부 Item이 누락된 상황을 상정합니다.    
 - 이와 함께 영화와 관련된 Side Imformation으로 영화별 감독, 장르, 제목, 작가, 개봉 년도를 제공합니다.  
 - 31,360명의 User, 6,807개의 Item, 5,154,471개의 Interaction으로 구성되어 있으며 Sparsity는 97.6%입니다.  
+
 
 ### 1.2 프로젝트 요약 
 - 평가 Metric: Recall@10  
