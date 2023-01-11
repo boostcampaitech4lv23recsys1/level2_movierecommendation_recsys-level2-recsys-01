@@ -76,6 +76,7 @@ Movie Recommendation/
 ---
 
 # 3. 프로젝트 수행 결과 (Public 5위 / Private 8위)
+<img src="https://user-images.githubusercontent.com/59256704/211751794-eb0cbcd3-9233-4536-ad0f-bf9e3690d8a4.png">
 
 ---
 
@@ -84,7 +85,3 @@ Movie Recommendation/
 - Boostcourse 강의 자료
 
 ---
-
-# 5. Contributors
-
-
